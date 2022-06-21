@@ -1,4 +1,4 @@
-FROM lanfanb/client7:2022.06.07.H1B
+FROM lanfanb/client7:2022.06.21.XiaZhi
 RUN cd ; \
 GOVERSION=1.18.3 ; \
 GIVERSION=2.34.3 ; \
