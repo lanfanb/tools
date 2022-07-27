@@ -31,6 +31,6 @@ jobs:
           docker login --username=${{ secrets.DOCKER_USERNAME }} --password "${{ secrets.DOCKER_PASSWORD }}"
           TZ="Asia/Shanghai"
           tag=$(date +'%Y.%m.%d')
-          docker build --rm --no-cache --squash -t lanfanb/client7:$tag .
-          docker push lanfanb/client7:$tag
+          docker build --rm --no-cache --squash -t lanfanb/siqbase:tools.$tag .
+          docker push lanfanb/siqbase:tools.$tag
 
