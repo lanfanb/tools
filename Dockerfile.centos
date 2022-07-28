@@ -1,0 +1,31 @@
+FROM docker.io/lanfanb/siqbase:centos.latest 
+RUN mkdir /tools && mkdir -p /data/src ; \
+export TZ="Asia/Shanghai" ; \
+export d=$(date +'%Y.%m.%d') ; \
+cd /data/src && git clone https://github.com/KLayout/klayout.git --branch v0.27.10 --depth 1 ; \
+cd /data/src/klayout && rm -rf build ; \
+./build.sh -qt5 -release -build build -prefix /tools/klayout-0.27.10 -j2 ; \
+#source /opt/rh/devtoolset-11/enable ; \
+#cd /data/src/lemon && rm -rf build && mkdir build && cd build ; \
+#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
+#make -j2 && make install ; \
+#cd /data/src/spdlog && rm -rf build && mkdir build && cd build ; \
+#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
+#make -j2 && make install ; \
+#cd /data/src/eigen && rm -rf build && mkdir build && cd build ; \
+#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
+#make -j2 && make install ; \
+#cd /data/src/OpenROAD && rm -rf build && mkdir build && cd build ; \
+#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
+# -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 -DEigen3_ROOT=/tools/eigen-3.4.0 \
+# -DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 ; \
+#make -j2 && make install ; \
+cd / ; \
+#tar -cJf /klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
+#tar -cJf /lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
+#tar -cJf /spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
+#tar -cJf /eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
+#tar -cJf /OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
+tar -cJf /artifacts.tar.xz -C /tools . ; \
+rm -rf /tools
+CMD ["/usr/sbin/init"]

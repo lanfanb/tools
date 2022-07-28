@@ -1,0 +1,40 @@
+FROM docker.io/lanfanb/siqbase:openeuler.latest
+RUN mkdir /tools ; \
+export TZ="Asia/Shanghai" ; \
+export d=$(date +'%Y.%m.%d') ; \
+#cd / ; \
+#git clone https://github.com/KLayout/klayout.git --branch v0.27.10 --depth 1 ; \
+#cd klayout && sed -i.bak '/-Wsign-promo/d' ./src/klayout.pri ; \
+#./build.sh -qt5 -release -build build -prefix /tools/klayout-0.27.10 -j2 ; \
+#cd / ; \
+#wget http://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz ; \
+#tar -xzf lemon-1.3.1.tar.gz ; \
+#cd lemon-1.3.1 && mkdir build && cd build ; \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
+#make -j2 && make install ; \
+#cd / ; \
+#git clone https://github.com/gabime/spdlog.git --branch v1.10.0 --depth 1 ; \
+#cd spdlog && mkdir build && cd build ; \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
+#make -j2 && make install ; \
+#cd / ; \
+#git clone https://gitlab.com/libeigen/eigen.git --branch 3.4.0 --depth 1 ; \
+#cd eigen && mkdir build && cd build ; \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
+#make -j2 && make install ; \
+#cd / ; \
+#git clone https://github.com/lanfanb/OpenROAD.git --depth 1 ; \
+#cd OpenROAD && git submodule update --init --recursive --depth 1 ; \
+#mkdir build && cd build ; \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
+# -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 \
+# -DEigen3_ROOT=/tools/eigen-3.4.0 ; \
+#make -j2 && make install ; \
+cd / ; \
+#tar -cJf /klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
+#tar -cJf /lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
+#tar -cJf /spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
+#tar -cJf /eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
+tar -cJf /OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
+rm -rf /tools /OpenROAD
+CMD ["/usr/sbin/init"]
