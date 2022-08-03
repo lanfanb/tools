@@ -2,39 +2,98 @@ FROM docker.io/lanfanb/siqbase:openeuler.latest
 RUN mkdir /tools ; \
 export TZ="Asia/Shanghai" ; \
 export d=$(date +'%Y.%m.%d') ; \
-#cd / ; \
-#git clone https://github.com/KLayout/klayout.git --branch v0.27.10 --depth 1 ; \
-#cd klayout && sed -i.bak '/-Wsign-promo/d' ./src/klayout.pri ; \
-#./build.sh -qt5 -release -build build -prefix /tools/klayout-0.27.10 -j2 ; \
-#cd / ; \
-#wget http://lemon.cs.elte.hu/pub/sources/lemon-1.3.1.tar.gz ; \
-#tar -xzf lemon-1.3.1.tar.gz ; \
-#cd lemon-1.3.1 && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
-#make -j2 && make install ; \
-#cd / ; \
-#git clone https://github.com/gabime/spdlog.git --branch v1.10.0 --depth 1 ; \
-#cd spdlog && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
-#make -j2 && make install ; \
-#cd / ; \
-#git clone https://gitlab.com/libeigen/eigen.git --branch 3.4.0 --depth 1 ; \
-#cd eigen && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
-#make -j2 && make install ; \
-#cd / ; \
-#git clone https://github.com/lanfanb/OpenROAD.git --depth 1 ; \
-#cd OpenROAD && git submodule update --init --recursive --depth 1 ; \
-#mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
-# -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 \
-# -DEigen3_ROOT=/tools/eigen-3.4.0 ; \
-#make -j2 && make install ; \
+#for f in /data/release/openeuler/*.tar.xz ; \
+#do \
+#tar -xJf $f -C /tools ; \
+#done ; \
+cd /data/src/klayout && rm -rf build ; \
+./build.sh -qt5 -release -build build -prefix /tools/klayout-0.27.10 -j2 ; \
+cd /data/src/lemon && rm -rf build && mkdir build && cd build ; \
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
+make -j2 && make install ; \
+cd /data/src/spdlog && rm -rf build && mkdir build && cd build ; \
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
+make -j2 && make install ; \
+cd /data/src/eigen && rm -rf build && mkdir build && cd build ; \
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
+make -j2 && make install ; \
+cd /data/src/OpenROAD && rm -rf build && mkdir build && cd build ; \
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
+ -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 -DEigen3_ROOT=/tools/eigen-3.4.0 ; \
+make -j2 && make install ; \
+cd /data/src/magic ; \
+./configure --prefix=/tools/magic-8.3.315 --with-x ; \
+make clean && make -j2 && make install ; \
+cd /data/src/netgen ; \
+./configure --prefix=/tools/netgen-1.5.227 ; \
+make clean && make -j2 && make install ; \
+cd /data/src/padring && rm -rf build && mkdir build && cd build ; \
+cmake -G Ninja .. ; \
+ninja && mkdir -p /tools/padring-$d/bin && install padring /tools/padring-$d/bin ; \
+cd /data/src/qrouter ; \
+./configure --prefix=/tools/qrouter-1.4.85 ; \
+make clean && make -j2 && make install ; \
+cd /data/src/graywolf && rm -rf build && mkdir build && cd build ; \
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$d ; \
+make -j2 && make install ; \
+cd /data/src/yosys ; \
+make clean && make config-gcc && make PREFIX=/tools/yosys-0.19 -j2 && make PREFIX=/tools/yosys-0.19 install ; \
+cd /data/src/cvc && autoreconf -vif ; \
+./configure --prefix=/tools/cvc-1.1.3 ; \
+make clean && make -j2 && make install ; \
+export OLDPATH=$PATH ; \
+export PATH=$PATH:/tools/yosys-0.19/bin ; \
+export PATH=$PATH:/tools/graywolf-$d/bin ; \
+export PATH=$PATH:/tools/qrouter-1.4.85/bin ; \
+export PATH=$PATH:/tools/magic-8.3.315/bin ; \
+export PATH=$PATH:/tools/netgen-1.5.227/bin ; \
+cd /data/src/qflow ; \
+./configure --prefix=/tools/qflow-1.4.98 ; \
+make clean && make -j2 && make install ; \
+export PATH=$OLDPATH ; \
+cd /data/src/OpenLane ; \
+mkdir -p /tools/OpenLane-$d/install ; \
+python -m venv --clear /tools/OpenLane-$d/install/venv ; \
+source /tools/OpenLane-$d/install/venv/bin/activate ; \
+pip install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple --upgrade pip volare ; \
+pip install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/precompile_time.txt ; \
+pip install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/compile_time.txt ; \
+pip install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/run_time.txt ; \
+deactivate ; \
+rsync -az scripts /tools/OpenLane-$d/ ; \
+rsync -az flow.tcl /tools/OpenLane-$d/ ; \
+rsync -az configuration /tools/OpenLane-$d/ ; \
+echo 'set OL_INSTALL_DIR [file dirname [file normalize [info script]]]' > /tools/OpenLane-$d/install/env.tcl ; \
+echo 'set ::env(OPENLANE_LOCAL_INSTALL) 1'                             >> /tools/OpenLane-$d/install/env.tcl ; \
+echo 'set ::env(OL_INSTALL_DIR) "$OL_INSTALL_DIR"'                     >> /tools/OpenLane-$d/install/env.tcl ; \
+echo 'set ::env(PATH) "$OL_INSTALL_DIR/venv/bin:$OL_INSTALL_DIR/bin:$::env(PATH)"' >> /tools/OpenLane-$d/install/env.tcl ; \
+echo 'set ::env(VIRTUAL_ENV) "$OL_INSTALL_DIR/venv"'                   >> /tools/OpenLane-$d/install/env.tcl ; \
+cd /data/src/gtkwave/gtkwave3-gtk3 ; \
+./autogen.sh && ./configure --prefix=/tools/gtkwave-$d --enable-gtk3 ; \
+make clean && make -j2 && make install ; \
+cd /data/src/iverilog ; \
+sh autoconf.sh && ./configure --prefix=/tools/iverilog-$d ; \
+make clean && make -j2 && make install ; \
+cd /data/src/verilator ; \
+autoconf && ./configure --prefix /tools/verilator-$d ; \
+make clean && make -j2 && make install ; \
 cd / ; \
-#tar -cJf /klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
-#tar -cJf /lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
-#tar -cJf /spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
-#tar -cJf /eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
-tar -cJf /OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
-rm -rf /tools /OpenROAD
+tar -cJf /data/release/openeuler/klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
+tar -cJf /data/release/openeuler/lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
+tar -cJf /data/release/openeuler/spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
+tar -cJf /data/release/openeuler/eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
+tar -cJf /data/release/openeuler/OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
+tar -cJf /data/release/openeuler/magic-8.3.315.tar.xz   -C /tools magic-8.3.315   ; \
+tar -cJf /data/release/openeuler/netgen-1.5.227.tar.xz  -C /tools netgen-1.5.227  ; \
+tar -cJf /data/release/openeuler/padring-$d.tar.xz      -C /tools padring-$d      ; \
+tar -cJf /data/release/openeuler/qrouter-1.4.85.tar.xz  -C /tools qrouter-1.4.85  ; \
+tar -cJf /data/release/openeuler/graywolf-$d.tar.xz     -C /tools graywolf-$d     ; \
+tar -cJf /data/release/openeuler/yosys-0.19.tar.xz      -C /tools yosys-0.19      ; \
+tar -cJf /data/release/openeuler/cvc-1.1.3.tar.xz       -C /tools cvc-1.1.3       ; \
+tar -cJf /data/release/openeuler/qflow-1.4.98.tar.xz    -C /tools qflow-1.4.98    ; \
+tar -cJf /data/release/openeuler/OpenLane-$d.tar.xz     -C /tools OpenLane-$d     ; \
+tar -cJf /data/release/openeuler/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
+tar -cJf /data/release/openeuler/iverilog-$d.tar.xz     -C /tools iverilog-$d     ; \
+tar -cJf /data/release/openeuler/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
+rm -rf /tools
 CMD ["/usr/sbin/init"]
