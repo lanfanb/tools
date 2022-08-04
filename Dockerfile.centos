@@ -89,7 +89,7 @@ cd /data/src/verilator ; \
 autoconf && ./configure --prefix /tools/verilator-$d ; \
 make clean && make -j2 && make install ; \
 cd /data/src/zlib-1.2.12 ; \
-./configure --prefix=/tools/zlib-1.2.12 ; \
+CFLAGS=-fPIC ./configure --prefix=/tools/zlib-1.2.12 ; \
 make clean && make -j2 && make install ; \
 cd / ; \
 tar -cJf /data/release/centos/klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
