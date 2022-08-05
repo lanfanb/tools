@@ -73,6 +73,9 @@ make clean && make -j2 && make install ; \
 cd /data/src/verilator ; \
 autoconf && ./configure --prefix /tools/verilator-$d ; \
 make clean && make -j2 && make install ; \
+cd /data/src/riscv-gnu-toolchain/spike && rm -rf build && mkdir build && cd build ; \
+../configure --prefix=/tools/spike-$d ; \
+make -j2 && make install ; \
 cd / ; \
 tar -cJf /data/release/openeuler/klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
 tar -cJf /data/release/openeuler/lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
@@ -91,5 +94,6 @@ tar -cJf /data/release/openeuler/OpenLane-$d.tar.xz     -C /tools OpenLane-$d   
 tar -cJf /data/release/openeuler/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
 tar -cJf /data/release/openeuler/iverilog-$d.tar.xz     -C /tools iverilog-$d     ; \
 tar -cJf /data/release/openeuler/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
+tar -cJf /data/release/openeuler/spike-$d.tar.xz        -C /tools spike-$d        ; \
 rm -rf /tools
 CMD ["/usr/sbin/init"]
