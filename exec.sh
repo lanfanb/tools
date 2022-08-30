@@ -6,40 +6,95 @@ mkdir /tools
 
 export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
+export CCACHE_DIR=/data/ccache
+if [[ "$os" == "openeuler" ]]
+then
+	export CMAKE=cmake
+elif [[ "$os" == "centos" ]]
+then
+	export CMAKE=cmake3
+fi
+
+# klayout
+cd /data/src/klayout
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build
+QMAKE_CCACHE=1 ./build.sh -qt5 -release -build build -prefix /tools/klayout-$tag -j2
+rm -rf build
+tar -cJf /data/release/$os/klayout-$tag.tar.xz -C /tools klayout-$tag
 
 if [[ "$os" == "centos" ]]
 then
 	source /opt/rh/devtoolset-11/enable
 fi
 
-# klayout
-cd /data/src/klayout
-rm -rf build
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-if [[ "$tag" == "undefined" ]]
-then
-	tag=$d
-fi
-./build.sh -qt5 -release -build build -prefix /tools/klayout-$tag -j2
-rm -rf build
-tar -cJf /data/release/$os/klayout-$tag.tar.xz -C /tools klayout-$tag
+# lemon
+cd /data/src/lemon
+tag=$d
+rm -rf build && mkdir build && cd build
+$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/lemon-$tag.tar.xz -C /tools lemon-$tag
+INSTALL_LEMON=/tools/lemon-$tag
 
-#cd /data/src/lemon && rm -rf build && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
-#make -j2 && make install ; \
-#cd /data/src/spdlog && rm -rf build && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
-#make -j2 && make install ; \
-#cd /data/src/eigen && rm -rf build && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
-#make -j2 && make install ; \
-#cd /data/src/OpenROAD && rm -rf build && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
-# -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 -DEigen3_ROOT=/tools/eigen-3.4.0 ; \
-#make -j2 && make install ; \
-#cd /data/src/magic ; \
-#./configure --prefix=/tools/magic-8.3.315 --with-x ; \
-#make clean && make -j2 && make install ; \
+# spdlog
+cd /data/src/spdlog
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/spdlog-$tag.tar.xz -C /tools spdlog-$tag
+INSTALL_SPDLOG=/tools/spdlog-$tag
+
+# eigen
+cd /data/src/eigen
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/eigen-$tag.tar.xz -C /tools eigen-$tag
+INSTALL_EIGEN=/tools/eigen-$tag
+
+# OpenROAD
+cd /data/src/OpenROAD
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+if [[ "$os" == "openeuler" ]]
+then
+	$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
+		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+elif [[ "$os" == "centos" ]]
+then
+	$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
+		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
+		-DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 \
+		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+fi
+make -j2 && make install ; \
+cd .. && rm -rf build
+tar -cJf /data/release/$os/OpenROAD-$tag.tar.xz -C /tools OpenROAD-$tag
+
+# magic
+cd /data/src/magic ; \
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+./configure --prefix=/tools/magic-$tag --with-x ; \
+make clean && make -j2 && make install && make clean ; \
+tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
+
 #cd /data/src/netgen ; \
 #./configure --prefix=/tools/netgen-1.5.227 ; \
 #make clean && make -j2 && make install ; \
@@ -97,11 +152,6 @@ tar -cJf /data/release/$os/klayout-$tag.tar.xz -C /tools klayout-$tag
 #../configure --prefix=/tools/spike-$d ; \
 #make -j2 && make install ; \
 #cd / ; \
-#tar -cJf /data/release/openeuler/lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
-#tar -cJf /data/release/openeuler/spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
-#tar -cJf /data/release/openeuler/eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
-#tar -cJf /data/release/openeuler/OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
-#tar -cJf /data/release/openeuler/magic-8.3.315.tar.xz   -C /tools magic-8.3.315   ; \
 #tar -cJf /data/release/openeuler/netgen-1.5.227.tar.xz  -C /tools netgen-1.5.227  ; \
 #tar -cJf /data/release/openeuler/padring-$d.tar.xz      -C /tools padring-$d      ; \
 #tar -cJf /data/release/openeuler/qrouter-1.4.85.tar.xz  -C /tools qrouter-1.4.85  ; \
@@ -115,23 +165,6 @@ tar -cJf /data/release/$os/klayout-$tag.tar.xz -C /tools klayout-$tag
 #tar -cJf /data/release/openeuler/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
 #tar -cJf /data/release/openeuler/spike-$d.tar.xz        -C /tools spike-$d        ; \
 
-#cd /data/src/lemon && rm -rf build && mkdir build && cd build ; \
-#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-1.3.1 ; \
-#make -j2 && make install ; \
-#cd /data/src/spdlog && rm -rf build && mkdir build && cd build ; \
-#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-1.10.0 ; \
-#make -j2 && make install ; \
-#cd /data/src/eigen && rm -rf build && mkdir build && cd build ; \
-#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-3.4.0 ; \
-#make -j2 && make install ; \
-#cd /data/src/OpenROAD && rm -rf build && mkdir build && cd build ; \
-#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
-# -Dspdlog_ROOT=/tools/spdlog-1.10.0 -DLEMON_ROOT=/tools/lemon-1.3.1 -DEigen3_ROOT=/tools/eigen-3.4.0 \
-# -DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 ; \
-#make -j2 && make install ; \
-#cd /data/src/magic ; \
-#./configure --prefix=/tools/magic-8.3.315 --with-x ; \
-#make clean && make -j2 && make install ; \
 #cd /data/src/netgen ; \
 #./configure --prefix=/tools/netgen-1.5.227 ; \
 #make clean && make -j2 && make install ; \
@@ -208,12 +241,6 @@ tar -cJf /data/release/$os/klayout-$tag.tar.xz -C /tools klayout-$tag
 #../configure --prefix=/tools/spike-$d ; \
 #make -j2 && make install ; \
 #cd / ; \
-#tar -cJf /data/release/centos/klayout-0.27.10.tar.xz -C /tools klayout-0.27.10 ; \
-#tar -cJf /data/release/centos/lemon-1.3.1.tar.xz     -C /tools lemon-1.3.1     ; \
-#tar -cJf /data/release/centos/spdlog-1.10.0.tar.xz   -C /tools spdlog-1.10.0   ; \
-#tar -cJf /data/release/centos/eigen-3.4.0.tar.xz     -C /tools eigen-3.4.0     ; \
-#tar -cJf /data/release/centos/OpenROAD-$d.tar.xz     -C /tools OpenROAD-$d     ; \
-#tar -cJf /data/release/centos/magic-8.3.315.tar.xz   -C /tools magic-8.3.315   ; \
 #tar -cJf /data/release/centos/netgen-1.5.227.tar.xz  -C /tools netgen-1.5.227  ; \
 #tar -cJf /data/release/centos/padring-$d.tar.xz      -C /tools padring-$d      ; \
 #tar -cJf /data/release/centos/qrouter-1.4.85.tar.xz  -C /tools qrouter-1.4.85  ; \
