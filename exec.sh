@@ -188,8 +188,9 @@ tag=${tag//^0/}
 tag=${tag//yosys-/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 make clean
-CC="ccache gcc" CXX="ccache g++" make config-gcc
-CC="ccache gcc" CXX="ccache g++" make PREFIX=/tools/yosys-$tag -j2
+sed -i 's/^ENABLE_CCACHE.*$/ENABLE_CCACHE := 1/' Makefile
+make config-gcc
+make PREFIX=/tools/yosys-$tag -j2
 make PREFIX=/tools/yosys-$tag install
 make clean
 tar -cJf /data/release/$os/yosys-$tag.tar.xz -C /tools yosys-$tag
@@ -248,6 +249,7 @@ tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$tag" == "nightly" ]]; then tag=$d; fi
 ./autogen.sh && CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/gtkwave-$tag --enable-gtk3
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/gtkwave-$tag.tar.xz -C /tools gtkwave-$tag
@@ -268,7 +270,7 @@ tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-autoconf && CC="ccache gcc" CXX="ccache g++" ./configure --prefix /tools/verilator-$tag
+autoconf && ./configure --prefix /tools/verilator-$tag
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/verilator-$tag.tar.xz -C /tools verilator-$tag
 
@@ -281,19 +283,6 @@ then
 	make clean && make -j2 && make install && make clean
 	tar -cJf /data/release/$os/zlib-$tag.tar.xz -C /tools zlib-$tag
 fi
-
-# qemu
-cd /data/src/qemu
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//^0/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-rm -rf build && mkdir build && cd build
-CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/qemu-$tag \
-	--target-list=riscv64-softmmu,riscv64-linux-user
-make -j2 && make install
-cd .. && rm -rf build
-tar -cJf /data/release/$os/qemu-$tag.tar.xz -C /tools qemu-$tag
 
 # spike
 cd /data/src/riscv-gnu-toolchain/spike
