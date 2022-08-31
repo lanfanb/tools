@@ -99,6 +99,7 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/magic-$tag --with-x
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
+INSTALL_MAGIC=/tools/magic-$tag
 
 # netgen
 cd /data/src/netgen
@@ -109,6 +110,7 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/netgen-$tag
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/netgen-$tag.tar.xz -C /tools netgen-$tag
+INSTALL_NETGEN=/tools/netgen-$tag
 
 # padring
 cd /data/src/padring
@@ -131,6 +133,7 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/qrouter-$tag
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/qrouter-$tag.tar.xz -C /tools qrouter-$tag
+INSTALL_QROUTER=/tools/qrouter-$tag
 
 # graywolf
 cd /data/src/graywolf
@@ -143,6 +146,7 @@ $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$tag -DCMAKE_CXX_COMPILER_LAUNC
 make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/graywolf-$tag.tar.xz -C /tools graywolf-$tag
+INSTALL_GRAYWOLF=/tools/graywolf-$tag
 
 # git
 cd /data/src/git
@@ -189,6 +193,7 @@ CC="ccache gcc" CXX="ccache g++" make PREFIX=/tools/yosys-$tag -j2
 make PREFIX=/tools/yosys-$tag install
 make clean
 tar -cJf /data/release/$os/yosys-$tag.tar.xz -C /tools yosys-$tag
+INSTALL_YOSYS=/tools/yosys-$tag
 
 # cvc
 cd /data/src/cvc
@@ -202,108 +207,106 @@ make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/cvc-$tag.tar.xz -C /tools cvc-$tag
 
 # qflow
-#export OLDPATH=$PATH ; \
-#export PATH=$PATH:/tools/yosys-0.20/bin ; \
-#export PATH=$PATH:/tools/graywolf-$d/bin ; \
-#export PATH=$PATH:/tools/qrouter-1.4.85/bin ; \
-#export PATH=$PATH:/tools/magic-8.3.315/bin ; \
-#export PATH=$PATH:/tools/netgen-1.5.227/bin ; \
-#cd /data/src/qflow ; \
-#./configure --prefix=/tools/qflow-1.4.98 ; \
-#make clean && make -j2 && make install ; \
-#export PATH=$OLDPATH ; \
-#cd /data/src/OpenLane ; \
-#mkdir -p /tools/OpenLane-$d/install ; \
-#python3 -m venv --clear /tools/OpenLane-$d/install/venv ; \
-#source /tools/OpenLane-$d/install/venv/bin/activate ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple --upgrade pip volare ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/precompile_time.txt ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/compile_time.txt ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/run_time.txt ; \
-#deactivate ; \
-#rsync -az scripts /tools/OpenLane-$d/ ; \
-#rsync -az flow.tcl /tools/OpenLane-$d/ ; \
-#rsync -az configuration /tools/OpenLane-$d/ ; \
-#echo 'set OL_INSTALL_DIR [file dirname [file normalize [info script]]]' > /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(OPENLANE_LOCAL_INSTALL) 1'                             >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(OL_INSTALL_DIR) "$OL_INSTALL_DIR"'                     >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(PATH) "$OL_INSTALL_DIR/venv/bin:$OL_INSTALL_DIR/bin:$::env(PATH)"' >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(VIRTUAL_ENV) "$OL_INSTALL_DIR/venv"'                   >> /tools/OpenLane-$d/install/env.tcl ; \
-#cd /data/src/gtkwave/gtkwave3-gtk3 ; \
-#./autogen.sh && ./configure --prefix=/tools/gtkwave-$d --enable-gtk3 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/iverilog ; \
-#sh autoconf.sh && ./configure --prefix=/tools/iverilog-$d ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/verilator ; \
-#autoconf && ./configure --prefix /tools/verilator-$d ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/riscv-gnu-toolchain/spike && rm -rf build && mkdir build && cd build ; \
-#../configure --prefix=/tools/spike-$d ; \
-#make -j2 && make install ; \
-#cd / ; \
-#tar -cJf /data/release/openeuler/qflow-1.4.98.tar.xz    -C /tools qflow-1.4.98    ; \
-#tar -cJf /data/release/openeuler/OpenLane-$d.tar.xz     -C /tools OpenLane-$d     ; \
-#tar -cJf /data/release/openeuler/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
-#tar -cJf /data/release/openeuler/iverilog-$d.tar.xz     -C /tools iverilog-$d     ; \
-#tar -cJf /data/release/openeuler/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
-#tar -cJf /data/release/openeuler/spike-$d.tar.xz        -C /tools spike-$d        ; \
+cd /data/src/qflow
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+export PATH=$PATH:$INSTALL_YOSYS/bin:$INSTALL_GRAYWOLF/bin:$INSTALL_QROUTER/bin
+export PATH=$PATH:$INSTALL_MAGIC/bin:$INSTALL_NETGEN/bin
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/qflow-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/qflow-$tag.tar.xz -C /tools qflow-$tag
 
-#export PATH=$OLDPATH ; \
-#export OLDPATH=$PATH ; \
-#export PATH=$PATH:/tools/yosys-0.20/bin ; \
-#export PATH=$PATH:/tools/graywolf-$d/bin ; \
-#export PATH=$PATH:/tools/qrouter-1.4.85/bin ; \
-#export PATH=$PATH:/tools/magic-8.3.315/bin ; \
-#export PATH=$PATH:/tools/netgen-1.5.227/bin ; \
-#cd /data/src/qflow ; \
-#./configure --prefix=/tools/qflow-1.4.98 ; \
-#make clean && make -j2 && make install ; \
-#export PATH=$OLDPATH ; \
-#cd /data/src/OpenLane ; \
-#mkdir -p /tools/OpenLane-$d/install ; \
-#python3 -m venv --clear /tools/OpenLane-$d/install/venv ; \
-#source /tools/OpenLane-$d/install/venv/bin/activate ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple --upgrade pip volare ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/precompile_time.txt ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/compile_time.txt ; \
-#pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/run_time.txt ; \
-#deactivate ; \
-#rsync -az scripts /tools/OpenLane-$d/ ; \
-#rsync -az flow.tcl /tools/OpenLane-$d/ ; \
-#rsync -az configuration /tools/OpenLane-$d/ ; \
-#echo 'set OL_INSTALL_DIR [file dirname [file normalize [info script]]]' > /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(OPENLANE_LOCAL_INSTALL) 1'                             >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(OL_INSTALL_DIR) "$OL_INSTALL_DIR"'                     >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(PATH) "$OL_INSTALL_DIR/venv/bin:$OL_INSTALL_DIR/bin:$::env(PATH)"' >> /tools/OpenLane-$d/install/env.tcl ; \
-#echo 'set ::env(VIRTUAL_ENV) "$OL_INSTALL_DIR/venv"'                   >> /tools/OpenLane-$d/install/env.tcl ; \
-#cd /data/src/gtkwave/gtkwave3-gtk3 ; \
-#./autogen.sh && ./configure --prefix=/tools/gtkwave-$d --enable-gtk3 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/iverilog ; \
-#sh autoconf.sh && ./configure --prefix=/tools/iverilog-$d ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/verilator ; \
-#autoconf && ./configure --prefix /tools/verilator-$d ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/zlib-1.2.12 ; \
-#CFLAGS=-fPIC ./configure --prefix=/tools/zlib-1.2.12 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/qemu && rm -rf build && mkdir build && cd build ; \
-#../configure --prefix=/tools/qemu-riscv64-7.0.0 --target-list=riscv64-softmmu,riscv64-linux-user ; \
-#make -j2 && make install ; \
-#cd /data/src/riscv-gnu-toolchain/spike && rm -rf build && mkdir build && cd build ; \
-#../configure --prefix=/tools/spike-$d ; \
-#make -j2 && make install ; \
-#cd / ; \
-#tar -cJf /data/release/centos/qflow-1.4.98.tar.xz    -C /tools qflow-1.4.98    ; \
-#tar -cJf /data/release/centos/OpenLane-$d.tar.xz     -C /tools OpenLane-$d     ; \
-#tar -cJf /data/release/centos/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
-#tar -cJf /data/release/centos/iverilog-$d.tar.xz     -C /tools iverilog-$d     ; \
-#tar -cJf /data/release/centos/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
-#tar -cJf /data/release/centos/zlib-1.2.12.tar.xz     -C /tools zlib-1.2.12     ; \
-#tar -cJf /data/release/centos/qemu-riscv64-7.0.0.tar.xz -C /tools qemu-riscv64-7.0.0 ; \
-#tar -cJf /data/release/centos/spike-$d.tar.xz        -C /tools spike-$d        ; \
+# OpenLane
+cd /data/src/OpenLane
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+mkdir -p /tools/OpenLane-$tag/install
+python3 -m venv --clear /tools/OpenLane-$tag/install/venv
+source /tools/OpenLane-$tag/install/venv/bin/activate
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple --upgrade pip volare
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/precompile_time.txt
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/compile_time.txt
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple -r dependencies/python/run_time.txt
+deactivate
+rsync -az scripts /tools/OpenLane-$tag/
+rsync -az flow.tcl /tools/OpenLane-$tag/
+rsync -az configuration /tools/OpenLane-$tag/
+echo 'set OL_INSTALL_DIR [file dirname [file normalize [info script]]]' > /tools/OpenLane-$tag/install/env.tcl
+echo 'set ::env(OPENLANE_LOCAL_INSTALL) 1'                             >> /tools/OpenLane-$tag/install/env.tcl
+echo 'set ::env(OL_INSTALL_DIR) "$OL_INSTALL_DIR"'                     >> /tools/OpenLane-$tag/install/env.tcl
+echo 'set ::env(PATH) "$OL_INSTALL_DIR/venv/bin:$OL_INSTALL_DIR/bin:$::env(PATH)"' >> /tools/OpenLane-$tag/install/env.tcl
+echo 'set ::env(VIRTUAL_ENV) "$OL_INSTALL_DIR/venv"'                   >> /tools/OpenLane-$tag/install/env.tcl
+tar -cJf /data/release/$os/OpenLane-$tag.tar.xz -C /tools OpenLane-$tag
 
+# gtkwave
+cd /data/src/gtkwave/gtkwave3-gtk3
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+./autogen.sh && CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/gtkwave-$tag --enable-gtk3
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/gtkwave-$tag.tar.xz -C /tools gtkwave-$tag
+
+# iverilog
+cd /data/src/iverilog
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+sh autoconf.sh && CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/iverilog-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/iverilog-$tag.tar.xz -C /tools iverilog-$tag
+
+# verilator
+cd /data/src/verilator
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+autoconf && CC="ccache gcc" CXX="ccache g++" ./configure --prefix /tools/verilator-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/verilator-$tag.tar.xz -C /tools verilator-$tag
+
+# zlib
+cd /data/src/zlib-1.2.12
+tag=1.2.12
+if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" CFLAGS=-fPIC ./configure --prefix=/tools/zlib-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/zlib-$tag.tar.xz -C /tools zlib-$tag
+fi
+
+# qemu
+cd /data/src/qemu
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/qemu-$tag \
+	--target-list=riscv64-softmmu,riscv64-linux-user
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/qemu-$tag.tar.xz -C /tools qemu-$tag
+
+# spike
+cd /data/src/riscv-gnu-toolchain/spike
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/spike-$tag
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/spike-$tag.tar.xz -C /tools spike-$tag
+
+# cleanup
 rm -rf /tools
 
