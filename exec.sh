@@ -19,6 +19,7 @@ fi
 cd /data/src/klayout
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
+tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build
 QMAKE_CCACHE=1 ./build.sh -qt5 -release -build build -prefix /tools/klayout-$tag -j2
@@ -44,6 +45,7 @@ INSTALL_LEMON=/tools/lemon-$tag
 cd /data/src/spdlog
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
+tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -56,6 +58,7 @@ INSTALL_SPDLOG=/tools/spdlog-$tag
 cd /data/src/eigen
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
+tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -68,6 +71,7 @@ INSTALL_EIGEN=/tools/eigen-$tag
 cd /data/src/OpenROAD
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
+tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 if [[ "$os" == "openeuler" ]]
@@ -82,36 +86,122 @@ then
 		-DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi
-make -j2 && make install ; \
+make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/OpenROAD-$tag.tar.xz -C /tools OpenROAD-$tag
 
 # magic
-cd /data/src/magic ; \
+cd /data/src/magic
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
+tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-./configure --prefix=/tools/magic-$tag --with-x ; \
-make clean && make -j2 && make install && make clean ; \
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/magic-$tag --with-x
+make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
 
-#cd /data/src/netgen ; \
-#./configure --prefix=/tools/netgen-1.5.227 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/padring && rm -rf build && mkdir build && cd build ; \
-#cmake -G Ninja .. ; \
-#ninja && mkdir -p /tools/padring-$d/bin && install padring /tools/padring-$d/bin ; \
-#cd /data/src/qrouter ; \
-#./configure --prefix=/tools/qrouter-1.4.85 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/graywolf && rm -rf build && mkdir build && cd build ; \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$d ; \
-#make -j2 && make install ; \
-#cd /data/src/yosys ; \
-#make clean && make config-gcc && make PREFIX=/tools/yosys-0.20 -j2 && make PREFIX=/tools/yosys-0.20 install ; \
-#cd /data/src/cvc && autoreconf -vif ; \
-#./configure --prefix=/tools/cvc-1.1.3 ; \
-#make clean && make -j2 && make install ; \
+# netgen
+cd /data/src/netgen
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/netgen-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/netgen-$tag.tar.xz -C /tools netgen-$tag
+
+# padring
+cd /data/src/padring
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+$CMAKE .. -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+ninja && mkdir -p /tools/padring-$tag/bin && install padring /tools/padring-$tag/bin
+cd .. && rm -rf build
+tar -cJf /data/release/$os/padring-$tag.tar.xz -C /tools padring-$tag
+
+# qrouter
+cd /data/src/qrouter
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/qrouter-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/qrouter-$tag.tar.xz -C /tools qrouter-$tag
+
+# graywolf
+cd /data/src/graywolf
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf build && mkdir build && cd build
+$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+make -j2 && make install
+cd .. && rm -rf build
+tar -cJf /data/release/$os/graywolf-$tag.tar.xz -C /tools graywolf-$tag
+
+# git
+cd /data/src/git
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$os" == "centos" ]]
+then
+	make clean
+	CC="ccache gcc" CXX="ccache g++" make prefix=/tools/git-$tag all
+	CC="ccache gcc" CXX="ccache g++" make prefix=/tools/git-$tag install
+	make clean
+	tar -cJf /data/release/$os/git-$tag.tar.xz -C /tools git-$tag
+	export PATH=/tools/git-$tag/bin:$PATH
+fi
+
+# bison
+cd /data/src/bison
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+cd /data/src/bison-3.8.2
+tag=3.8.2
+if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/bison-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/bison-$tag.tar.xz -C /tools bison-$tag
+	export PATH=/tools/bison-$tag/bin:$PATH
+fi
+
+# yosys
+cd /data/src/yosys
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+tag=${tag//yosys-/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+make clean
+CC="ccache gcc" CXX="ccache g++" make config-gcc
+CC="ccache gcc" CXX="ccache g++" make PREFIX=/tools/yosys-$tag -j2
+make PREFIX=/tools/yosys-$tag install
+make clean
+tar -cJf /data/release/$os/yosys-$tag.tar.xz -C /tools yosys-$tag
+
+# cvc
+cd /data/src/cvc
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+autoreconf -vif
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/cvc-$tag
+make clean && make -j2 && make install && make clean
+tar -cJf /data/release/$os/cvc-$tag.tar.xz -C /tools cvc-$tag
+
+# qflow
 #export OLDPATH=$PATH ; \
 #export PATH=$PATH:/tools/yosys-0.20/bin ; \
 #export PATH=$PATH:/tools/graywolf-$d/bin ; \
@@ -152,12 +242,6 @@ tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
 #../configure --prefix=/tools/spike-$d ; \
 #make -j2 && make install ; \
 #cd / ; \
-#tar -cJf /data/release/openeuler/netgen-1.5.227.tar.xz  -C /tools netgen-1.5.227  ; \
-#tar -cJf /data/release/openeuler/padring-$d.tar.xz      -C /tools padring-$d      ; \
-#tar -cJf /data/release/openeuler/qrouter-1.4.85.tar.xz  -C /tools qrouter-1.4.85  ; \
-#tar -cJf /data/release/openeuler/graywolf-$d.tar.xz     -C /tools graywolf-$d     ; \
-#tar -cJf /data/release/openeuler/yosys-0.20.tar.xz      -C /tools yosys-0.20      ; \
-#tar -cJf /data/release/openeuler/cvc-1.1.3.tar.xz       -C /tools cvc-1.1.3       ; \
 #tar -cJf /data/release/openeuler/qflow-1.4.98.tar.xz    -C /tools qflow-1.4.98    ; \
 #tar -cJf /data/release/openeuler/OpenLane-$d.tar.xz     -C /tools OpenLane-$d     ; \
 #tar -cJf /data/release/openeuler/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
@@ -165,35 +249,6 @@ tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
 #tar -cJf /data/release/openeuler/verilator-$d.tar.xz    -C /tools verilator-$d    ; \
 #tar -cJf /data/release/openeuler/spike-$d.tar.xz        -C /tools spike-$d        ; \
 
-#cd /data/src/netgen ; \
-#./configure --prefix=/tools/netgen-1.5.227 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/padring && rm -rf build && mkdir build && cd build ; \
-#cmake3 -G Ninja .. ; \
-#ninja && mkdir -p /tools/padring-$d/bin && install padring /tools/padring-$d/bin ; \
-#cd /data/src/qrouter ; \
-#./configure --prefix=/tools/qrouter-1.4.85 ; \
-#make clean && make -j2 && make install ; \
-#cd /data/src/graywolf && rm -rf build && mkdir build && cd build ; \
-#cmake3 .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$d ; \
-#make -j2 && make install ; \
-#cd /data/src/git ; \
-#make clean ; \
-#make prefix=/tools/git-2.37.1 all ; \
-#make prefix=/tools/git-2.37.1 install ; \
-#cd /data/src/bison && ./bootstrap ; \
-#cd /data/src/bison-3.8.2 ; \
-#./configure --prefix=/tools/bison-3.8.2 ; \
-#make clean && make -j2 && make install ; \
-#export OLDPATH=$PATH ; \
-#export PATH=/tools/git-2.37.1/bin:$PATH ; \
-#cd /data/src/yosys ; \
-#make clean && make config-gcc && make PREFIX=/tools/yosys-0.20 && make PREFIX=/tools/yosys-0.20 install ; \
-#export PATH=$OLDPATH ; \
-#export PATH=/tools/bison-3.8.2/bin:$PATH ; \
-#cd /data/src/cvc && autoreconf -vif ; \
-#./configure --prefix=/tools/cvc-1.1.3 ; \
-#make clean && make -j2 && make install ; \
 #export PATH=$OLDPATH ; \
 #export OLDPATH=$PATH ; \
 #export PATH=$PATH:/tools/yosys-0.20/bin ; \
@@ -241,14 +296,6 @@ tar -cJf /data/release/$os/magic-$tag.tar.xz -C /tools magic-$tag
 #../configure --prefix=/tools/spike-$d ; \
 #make -j2 && make install ; \
 #cd / ; \
-#tar -cJf /data/release/centos/netgen-1.5.227.tar.xz  -C /tools netgen-1.5.227  ; \
-#tar -cJf /data/release/centos/padring-$d.tar.xz      -C /tools padring-$d      ; \
-#tar -cJf /data/release/centos/qrouter-1.4.85.tar.xz  -C /tools qrouter-1.4.85  ; \
-#tar -cJf /data/release/centos/graywolf-$d.tar.xz     -C /tools graywolf-$d     ; \
-#tar -cJf /data/release/centos/git-2.37.1.tar.xz      -C /tools git-2.37.1      ; \
-#tar -cJf /data/release/centos/bison-3.8.2.tar.xz     -C /tools bison-3.8.2     ; \
-#tar -cJf /data/release/centos/yosys-0.20.tar.xz      -C /tools yosys-0.20      ; \
-#tar -cJf /data/release/centos/cvc-1.1.3.tar.xz       -C /tools cvc-1.1.3       ; \
 #tar -cJf /data/release/centos/qflow-1.4.98.tar.xz    -C /tools qflow-1.4.98    ; \
 #tar -cJf /data/release/centos/OpenLane-$d.tar.xz     -C /tools OpenLane-$d     ; \
 #tar -cJf /data/release/centos/gtkwave-$d.tar.xz      -C /tools gtkwave-$d      ; \
