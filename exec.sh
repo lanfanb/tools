@@ -164,22 +164,6 @@ then
 	export PATH=/tools/git-$tag/bin:$PATH
 fi
 
-# bison
-cd /data/src/bison
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//^0/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-cd /data/src/bison-3.8.2
-tag=3.8.2
-if [[ "$os" == "centos" ]]
-then
-	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/bison-$tag
-	make clean && make -j2 && make install && make clean
-	tar -cJf /data/release/$os/bison-$tag.tar.xz -C /tools bison-$tag
-	export PATH=/tools/bison-$tag/bin:$PATH
-fi
-
 # yosys
 cd /data/src/yosys
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
@@ -275,8 +259,11 @@ make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/verilator-$tag.tar.xz -C /tools verilator-$tag
 
 # zlib
-cd /data/src/zlib-1.2.12
-tag=1.2.12
+cd /data/src/zlib
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//^0/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [[ "$os" == "centos" ]]
 then
 	CC="ccache gcc" CXX="ccache g++" CFLAGS=-fPIC ./configure --prefix=/tools/zlib-$tag
