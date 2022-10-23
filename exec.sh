@@ -271,18 +271,6 @@ then
 	tar -cJf /data/release/$os/zlib-$tag.tar.xz -C /tools zlib-$tag
 fi
 
-# spike
-cd /data/src/riscv-gnu-toolchain/spike
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//^0/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-rm -rf build && mkdir build && cd build
-CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/spike-$tag
-make -j2 && make install
-cd .. && rm -rf build
-tar -cJf /data/release/$os/spike-$tag.tar.xz -C /tools spike-$tag
-
 # cleanup
 rm -rf /tools
 
