@@ -15,17 +15,7 @@ then
 	export CMAKE=cmake3
 fi
 
-# python
-cd /data/src/python
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//^0/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-rm -rf build && mkdir build && cd build
-CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/python39 --enable-shared --enable-optimizations
-make -j2 && make install
-cd .. && rm -rf build
-tar -cJf /data/release/$os/python39.tar.xz -C /tools python39
+tar -xJf /data/release/$os/python39.tar.xz -C /tools
 export PATH=/tools/python39/bin:$PATH
 export LD_LIBRARY_PATH=/tools/python39/lib
 
