@@ -11,13 +11,17 @@ tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-mkdir -p build && cd build
-../autogen.sh --with-parallelism=1 --with-help --with-lang="en-US zh-CN"
-make
-rm -rf /data/tools/LibreOffice-CollaboraOnline-$tag
-mkdir -p /data/tools/LibreOffice-CollaboraOnline-$tag
-rsync -azL include /data/tools/LibreOffice-CollaboraOnline-$tag/
-rsync -azL instdir /data/tools/LibreOffice-CollaboraOnline-$tag/
+if [ -d "/data/tools/LibreOffice-CollaboraOnline-$tag" ]
+then
+	echo "/data/tools/LibreOffice-CollaboraOnline-$tag exists. Skipping."
+else
+	mkdir -p build && cd build
+	../autogen.sh --with-parallelism=1 --with-help --with-lang="en-US zh-CN"
+	make
+	mkdir -p /data/tools/LibreOffice-CollaboraOnline-$tag
+	rsync -azL include /data/tools/LibreOffice-CollaboraOnline-$tag/
+	rsync -azL instdir /data/tools/LibreOffice-CollaboraOnline-$tag/
+fi
 LO_PATH=/data/tools/LibreOffice-CollaboraOnline-$tag
 
 # CollaboraOnline
@@ -26,17 +30,20 @@ tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//^0/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf /data/tools/CollaboraOnline-$tag
 ./autogen.sh
-CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/ --enable-silent-rules \
+CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/data/tools/CollaboraOnline-$tag \
+	--enable-silent-rules --enable-cypress --with-dictionaries="en_US zh_CN" \
 	--with-lokit-path=$LO_PATH/include --with-lo-path=$LO_PATH/instdir \
-	--enable-cypress --with-dictionaries="en_US zh_CN" --with-user-id=pi
+	--with-user-id=pi
 sed -i "s/npm install/npm install --build-from-source/" Makefile
 export http_proxy=socks5://127.0.0.1:1080
 export https_proxy=socks5://127.0.0.1:1080
 make
-rm -rf /data/tools/CollaboraOnline-$tag
-DESTDIR=/data/tools/CollaboraOnline-$tag make install
+make install
 cd /data/tools/CollaboraOnline-$tag/bin
 sudo /sbin/setcap cap_fowner,cap_chown,cap_mknod,cap_sys_chroot=ep coolforkit
 sudo /sbin/setcap cap_sys_admin=ep coolmount
+./coolwsd-systemplate-setup ../systemplate $LO_PATH/instdir
+ln -sfv ../share/coolwsd/* .
 
