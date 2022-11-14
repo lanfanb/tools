@@ -9,7 +9,7 @@ export d=$(date +'%Y.%m.%d')
 cd /data/src/riscv-gnu-toolchain
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 ../configure --prefix=/data/tools/riscv-$tag --enable-multilib

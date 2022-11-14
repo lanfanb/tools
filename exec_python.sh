@@ -18,10 +18,6 @@ fi
 
 # python
 cd /data/src/python
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//^0/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/tools/python39 --enable-shared --enable-optimizations
 make -j2 && make install

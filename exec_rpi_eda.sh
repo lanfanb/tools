@@ -9,7 +9,7 @@ export d=$(date +'%Y.%m.%d')
 cd /data/src/OpenROAD
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf /data/tools/OpenROAD-$tag
 mkdir -p build && cd build
@@ -22,7 +22,7 @@ make install
 cd /data/src/OpenLane
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf /data/tools/OpenLane-$tag
 mkdir -p /data/tools/OpenLane-$tag/install
@@ -46,7 +46,7 @@ echo 'set ::env(VIRTUAL_ENV) "$OL_INSTALL_DIR/venv"'                   >> /data/
 cd /data/src/yosys
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 tag=${tag//yosys-/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 make config-gcc

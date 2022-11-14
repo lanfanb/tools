@@ -23,7 +23,7 @@ export LD_LIBRARY_PATH=/tools/python39/lib
 cd /data/src/klayout
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build
 QMAKE_CCACHE=1 ./build.sh -qt5 -release -build build -prefix /tools/klayout-$tag -j2
@@ -49,7 +49,7 @@ INSTALL_LEMON=/tools/lemon-$tag
 cd /data/src/spdlog
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -62,7 +62,7 @@ INSTALL_SPDLOG=/tools/spdlog-$tag
 cd /data/src/eigen
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -75,7 +75,7 @@ INSTALL_EIGEN=/tools/eigen-$tag
 cd /data/src/OpenROAD
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 if [[ "$os" == "openeuler" ]]
@@ -98,7 +98,7 @@ tar -cJf /data/release/$os/OpenROAD-$tag.tar.xz -C /tools OpenROAD-$tag
 cd /data/src/magic
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/magic-$tag --with-x
 make clean && make -j2 && make install && make clean
@@ -109,7 +109,7 @@ INSTALL_MAGIC=/tools/magic-$tag
 cd /data/src/netgen
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/netgen-$tag
 make clean && make -j2 && make install && make clean
@@ -120,7 +120,7 @@ INSTALL_NETGEN=/tools/netgen-$tag
 cd /data/src/padring
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -132,7 +132,7 @@ tar -cJf /data/release/$os/padring-$tag.tar.xz -C /tools padring-$tag
 cd /data/src/qrouter
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/qrouter-$tag
 make clean && make -j2 && make install && make clean
@@ -143,7 +143,7 @@ INSTALL_QROUTER=/tools/qrouter-$tag
 cd /data/src/graywolf
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 $CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
@@ -156,7 +156,7 @@ INSTALL_GRAYWOLF=/tools/graywolf-$tag
 cd /data/src/git
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [[ "$os" == "centos" ]]
 then
@@ -172,11 +172,10 @@ fi
 cd /data/src/yosys
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 tag=${tag//yosys-/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 make clean
-sed -i 's/^ENABLE_CCACHE.*$/ENABLE_CCACHE := 1/' Makefile
 make config-gcc
 make PREFIX=/tools/yosys-$tag -j2
 make PREFIX=/tools/yosys-$tag install
@@ -188,7 +187,7 @@ INSTALL_YOSYS=/tools/yosys-$tag
 cd /data/src/cvc
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 autoreconf -vif
 CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/cvc-$tag
@@ -199,7 +198,7 @@ tar -cJf /data/release/$os/cvc-$tag.tar.xz -C /tools cvc-$tag
 cd /data/src/qflow
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 export PATH=$PATH:$INSTALL_YOSYS/bin:$INSTALL_GRAYWOLF/bin:$INSTALL_QROUTER/bin
 export PATH=$PATH:$INSTALL_MAGIC/bin:$INSTALL_NETGEN/bin
@@ -211,7 +210,7 @@ tar -cJf /data/release/$os/qflow-$tag.tar.xz -C /tools qflow-$tag
 cd /data/src/OpenLane
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 mkdir -p /tools/OpenLane-$tag/install
 python3 -m venv --clear /tools/OpenLane-$tag/install/venv
@@ -235,7 +234,7 @@ tar -cJf /data/release/$os/OpenLane-$tag.tar.xz -C /tools OpenLane-$tag
 cd /data/src/gtkwave/gtkwave3-gtk3
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [[ "$tag" == "nightly" ]]; then tag=$d; fi
 ./autogen.sh && CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/gtkwave-$tag --enable-gtk3
@@ -246,7 +245,7 @@ tar -cJf /data/release/$os/gtkwave-$tag.tar.xz -C /tools gtkwave-$tag
 cd /data/src/iverilog
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 sh autoconf.sh && CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/iverilog-$tag
 make clean && make -j2 && make install && make clean
@@ -256,7 +255,7 @@ tar -cJf /data/release/$os/iverilog-$tag.tar.xz -C /tools iverilog-$tag
 cd /data/src/verilator
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 autoconf && ./configure --prefix /tools/verilator-$tag
 make clean && make -j2 && make install && make clean
@@ -266,7 +265,7 @@ tar -cJf /data/release/$os/verilator-$tag.tar.xz -C /tools verilator-$tag
 cd /data/src/zlib
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [[ "$os" == "centos" ]]
 then

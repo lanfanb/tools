@@ -9,7 +9,7 @@ export d=$(date +'%Y.%m.%d')
 cd /data/office/LibreOffice
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [ -d "/data/tools/LibreOffice-CollaboraOnline-$tag" ]
 then
@@ -28,7 +28,7 @@ LO_PATH=/data/tools/LibreOffice-CollaboraOnline-$tag
 cd /data/office/CollaboraOnline
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf /data/tools/CollaboraOnline-$tag
 ./autogen.sh

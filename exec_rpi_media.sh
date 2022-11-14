@@ -9,7 +9,7 @@ export d=$(date +'%Y.%m.%d')
 cd /data/src/ffmpeg
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 mkdir -p build && cd build
 ../configure --cc="ccache gcc" --cxx="ccache g++" --prefix=/data/tools/ffmpeg-$tag \
@@ -36,7 +36,7 @@ exit
 cd /data/src/opencv
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
-tag=${tag//^0/}
+tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 mkdir -p build && cd build
 cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache \
