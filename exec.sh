@@ -152,22 +152,6 @@ cd .. && rm -rf build
 tar -cJf /data/release/$os/graywolf-$tag.tar.xz -C /tools graywolf-$tag
 INSTALL_GRAYWOLF=/tools/graywolf-$tag
 
-# git
-cd /data/src/git
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
-tag=${tag//\^*/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-if [[ "$os" == "centos" ]]
-then
-	make clean
-	CC="ccache gcc" CXX="ccache g++" make prefix=/tools/git-$tag all
-	CC="ccache gcc" CXX="ccache g++" make prefix=/tools/git-$tag install
-	make clean
-	tar -cJf /data/release/$os/git-$tag.tar.xz -C /tools git-$tag
-	export PATH=/tools/git-$tag/bin:$PATH
-fi
-
 # yosys
 cd /data/src/yosys
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
