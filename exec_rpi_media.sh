@@ -8,7 +8,7 @@ export d=$(date +'%Y.%m.%d')
 # ffmpeg
 cd /data/src/ffmpeg
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
-tag=${tag//v/}
+tag=${tag//n/}
 tag=${tag//^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 mkdir -p build && cd build
