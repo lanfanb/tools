@@ -90,7 +90,7 @@ if [[ "$os" == "openeuler" ]]
 then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$tag -DCMAKE_BUILD_TYPE=RELEASE \
 		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
-		-DCMAKE_PREFIX_PATH=$INSTALL_ORTOOLS/lib/cmake \
+		-DCMAKE_PREFIX_PATH="$INSTALL_ORTOOLS/lib64/cmake;$INSTALL_ORTOOLS/lib/cmake" \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 elif [[ "$os" == "centos" ]]
 then
