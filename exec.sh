@@ -2,7 +2,7 @@
 
 os=$1
 
-mkdir /tools
+mkdir -p /tools
 
 export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
@@ -96,7 +96,7 @@ elif [[ "$os" == "centos" ]]
 then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
 		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
-		-DCMAKE_PREFIX_PATH=$INSTALL_ORTOOLS/lib64/cmake \
+		-DCMAKE_PREFIX_PATH="$INSTALL_ORTOOLS/lib64/cmake;$INSTALL_ORTOOLS/lib/cmake" \
 		-DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi

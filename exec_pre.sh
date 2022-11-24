@@ -2,7 +2,7 @@
 
 os=$1
 
-mkdir /tools
+mkdir -p /tools
 
 export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
