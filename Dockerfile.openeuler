@@ -1,4 +1,4 @@
 FROM docker.io/lanfanb/siqbase:openeuler.latest
-RUN /data/src/tools/exec_python.sh openeuler ; \
+RUN /data/src/tools/exec_pre.sh openeuler ; \
 /data/src/tools/exec.sh openeuler
 CMD ["/usr/sbin/init"]

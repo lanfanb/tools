@@ -7,16 +7,10 @@ mkdir /tools
 export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
 export CCACHE_DIR=/data/ccache
-if [[ "$os" == "openeuler" ]]
-then
-	export CMAKE=cmake
-elif [[ "$os" == "centos" ]]
-then
-	export CMAKE=cmake3
-fi
 
 tar -xJf /data/release/$os/python39.tar.xz -C /tools
-export PATH=/tools/python39/bin:$PATH
+tar -xJf /data/release/$os/cmake-3.25.0.tar.xz -C /tools
+export PATH=/tools/python39/bin:/tools/cmake-3.25.0/bin:$PATH
 export LD_LIBRARY_PATH=/tools/python39/lib
 
 # klayout
@@ -39,7 +33,7 @@ fi
 cd /data/src/lemon
 tag=$d
 rm -rf build && mkdir build && cd build
-$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/lemon-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/lemon-$tag.tar.xz -C /tools lemon-$tag
@@ -52,7 +46,7 @@ tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
-$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/spdlog-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/spdlog-$tag.tar.xz -C /tools spdlog-$tag
@@ -65,11 +59,25 @@ tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
-$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/eigen-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/eigen-$tag.tar.xz -C /tools eigen-$tag
 INSTALL_EIGEN=/tools/eigen-$tag
+
+# or-tools
+cd /data/src/or-tools
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+cmake -S. -Bbuild_$os -DBUILD_DEPS:BOOL=ON \
+	-DCMAKE_INSTALL_PREFIX=/tools/or-tools-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+	-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake --build build_$os
+cmake --build build_$os --target install
+tar -cJf /data/release/$os/or-tools-$tag.tar.xz -C /tools or-tools-$tag
+INSTALL_ORTOOLS=/tools/or-tools-$tag
 
 # OpenROAD
 cd /data/src/OpenROAD
@@ -80,13 +88,15 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
 if [[ "$os" == "openeuler" ]]
 then
-	$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$tag -DCMAKE_BUILD_TYPE=RELEASE \
 		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
+		-DCMAKE_PREFIX_PATH=$INSTALL_ORTOOLS/lib/cmake \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 elif [[ "$os" == "centos" ]]
 then
-	$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$d -DCMAKE_BUILD_TYPE=RELEASE \
 		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
+		-DCMAKE_PREFIX_PATH=$INSTALL_ORTOOLS/lib64/cmake \
 		-DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi
@@ -123,7 +133,7 @@ tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
-$CMAKE .. -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake .. -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 ninja && mkdir -p /tools/padring-$tag/bin && install padring /tools/padring-$tag/bin
 cd .. && rm -rf build
 tar -cJf /data/release/$os/padring-$tag.tar.xz -C /tools padring-$tag
@@ -146,7 +156,7 @@ tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
-$CMAKE .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+cmake .. -DCMAKE_INSTALL_PREFIX=/tools/graywolf-$tag -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 make -j2 && make install
 cd .. && rm -rf build
 tar -cJf /data/release/$os/graywolf-$tag.tar.xz -C /tools graywolf-$tag

@@ -1,4 +1,4 @@
 FROM docker.io/lanfanb/siqbase:centos.latest 
-RUN /data/src/tools/exec_python.sh centos ; \
+RUN /data/src/tools/exec_pre.sh centos ; \
 /data/src/tools/exec.sh centos
 CMD ["/usr/sbin/init"]

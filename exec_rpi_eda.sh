@@ -17,7 +17,7 @@ cmake -S. -Bbuild -DBUILD_DEPS:BOOL=ON \
 	-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 cmake --build build
 cmake --build build --target install
-export INSTALL_ORTOOLS=/data/tools/or-tools-$tag
+INSTALL_ORTOOLS=/data/tools/or-tools-$tag
 
 # OpenROAD
 cd /data/src/OpenROAD
