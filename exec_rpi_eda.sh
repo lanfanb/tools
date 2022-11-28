@@ -77,10 +77,23 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf /data/tools/ngspice-$tag
 ./autogen.sh --adms
 mkdir -p build && cd build
-../configure --prefix=/data/tools/ngspice-$tag --with-x --enable-xspice \
-	--enable-cider --with-readline=yes --enable-openmp --enable-adms \
-	--disable-debug
+CC="ccache gcc" CXX="ccache g++" ../configure --prefix=/data/tools/ngspice-$tag \
+	--with-x --enable-xspice --enable-cider --with-readline=yes --enable-openmp \
+	--enable-adms --disable-debug
 #CFLAGS="-m64 -O2" LDFLAGS="-m64 -s"
+make
+make install
+
+# DREAMplace
+cd /data/src/DREAMPlace
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+rm -rf /data/tools/DREAMPlace-$tag
+mkdir -p build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/data/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+	-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 make
 make install
 
