@@ -23,7 +23,7 @@ tar -xJf /data/release/$os/cmake-$tag.tar.xz -C /tools
 export PATH=/tools/cmake-$tag/bin:$PATH
 
 # bison
-cd /data/src/bison
+cd /data/src/gnu/bison
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//\^*/}
