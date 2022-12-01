@@ -95,7 +95,7 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 cmake -S. -Bbuild_$os -DBUILD_DEPS:BOOL=ON \
 	-DCMAKE_INSTALL_PREFIX=/tools/or-tools-$tag -DCMAKE_BUILD_TYPE=RELEASE \
 	-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
-cmake --build build_$os
+cmake --build build_$os -j2
 cmake --build build_$os --target install
 tar -cJf /data/release/$os/or-tools-$tag.tar.xz -C /tools or-tools-$tag
 INSTALL_ORTOOLS=/tools/or-tools-$tag
