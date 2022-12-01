@@ -8,18 +8,30 @@ export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
 export CCACHE_DIR=/data/ccache
 
+# python
 tar -xJf /data/release/$os/python39.tar.xz -C /tools
-tar -xJf /data/release/$os/cmake-3.25.0.tar.xz -C /tools
-if [[ "$os" == "centos" ]]
-then
-	tar -xJf /data/release/$os/bison-3.8.2.tar.xz -C /tools
-fi
-
-export PATH=/tools/python39/bin:/tools/cmake-3.25.0/bin:$PATH
+export PATH=/tools/python39/bin:$PATH
 export LD_LIBRARY_PATH=/tools/python39/lib
+
+# cmake
+cd /data/src/cmake
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+tar -xJf /data/release/$os/cmake-$tag.tar.xz -C /tools
+export PATH=/tools/cmake-3.25.0/bin:$PATH
+
+# bison
+cd /data/src/bison
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 if [[ "$os" == "centos" ]]
 then
-	export PATH=/tools/bison-3.8.2/bin:$PATH
+	tar -xJf /data/release/$os/bison-$tag.tar.xz -C /tools
+	export PATH=/tools/bison-$tag/bin:$PATH
 fi
 
 # klayout

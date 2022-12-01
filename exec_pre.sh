@@ -24,13 +24,17 @@ tar -cJf /data/release/$os/python39.tar.xz -C /tools python39
 
 # cmake
 cd /data/src/cmake
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 rm -rf build && mkdir build && cd build
-../bootstrap --prefix=/tools/cmake-3.25.0 --enable-ccache
+../bootstrap --prefix=/tools/cmake-$tag --enable-ccache
 make -j2
 make install
 cd ..
 rm -rf build
-tar -cJf /data/release/$os/cmake-3.25.0.tar.xz -C /tools cmake-3.25.0
+tar -cJf /data/release/$os/cmake-$tag.tar.xz -C /tools cmake-$tag
 
 # zlib
 cd /data/src/zlib
