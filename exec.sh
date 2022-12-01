@@ -20,7 +20,7 @@ tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 tar -xJf /data/release/$os/cmake-$tag.tar.xz -C /tools
-export PATH=/tools/cmake-3.25.0/bin:$PATH
+export PATH=/tools/cmake-$tag/bin:$PATH
 
 # bison
 cd /data/src/bison
