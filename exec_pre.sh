@@ -7,12 +7,8 @@ mkdir -p /tools
 export TZ="Asia/Shanghai"
 export d=$(date +'%Y.%m.%d')
 export CCACHE_DIR=/data/ccache
-if [[ "$os" == "openeuler" ]]
+if [[ "$os" == "centos" ]]
 then
-	export CMAKE=cmake
-elif [[ "$os" == "centos" ]]
-then
-	export CMAKE=cmake3
 	source /opt/rh/devtoolset-11/enable
 fi
 
@@ -35,6 +31,66 @@ make install
 cd ..
 rm -rf build
 tar -cJf /data/release/$os/cmake-3.25.0.tar.xz -C /tools cmake-3.25.0
+
+# zlib
+cd /data/src/zlib
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" CFLAGS=-fPIC ./configure --prefix=/tools/zlib-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/zlib-$tag.tar.xz -C /tools zlib-$tag
+fi
+
+# autoconf
+cd /data/src/gnu/autoconf
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+cd /data/src/gnu/autoconf-2.71
+tag=2.71
+if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/autoconf-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/autoconf-$tag.tar.xz -C /tools autoconf-$tag
+	export PATH=/tools/autoconf-$tag/bin:$PATH
+fi
+
+# automake
+cd /data/src/gnu/automake
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+cd /data/src/gnu/automake-1.16.5
+tag=1.16.5
+if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/automake-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/automake-$tag.tar.xz -C /tools automake-$tag
+	export PATH=/tools/automake-$tag/bin:$PATH
+fi
+
+# bison
+cd /data/src/gnu/bison
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$os" == "centos" ]]
+then
+	./bootstrap
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/bison-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/bison-$tag.tar.xz -C /tools bison-$tag
+	export PATH=/tools/bison-$tag/bin:$PATH
+fi
 
 # cleanup
 rm -rf /tools

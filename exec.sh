@@ -10,8 +10,17 @@ export CCACHE_DIR=/data/ccache
 
 tar -xJf /data/release/$os/python39.tar.xz -C /tools
 tar -xJf /data/release/$os/cmake-3.25.0.tar.xz -C /tools
+if [[ "$os" == "centos" ]]
+then
+	tar -xJf /data/release/$os/bison-3.8.2.tar.xz -C /tools
+fi
+
 export PATH=/tools/python39/bin:/tools/cmake-3.25.0/bin:$PATH
 export LD_LIBRARY_PATH=/tools/python39/lib
+if [[ "$os" == "centos" ]]
+then
+	export PATH=/tools/bison-3.8.2/bin:$PATH
+fi
 
 # klayout
 cd /data/src/klayout
@@ -255,18 +264,32 @@ autoconf && ./configure --prefix /tools/verilator-$tag
 make clean && make -j2 && make install && make clean
 tar -cJf /data/release/$os/verilator-$tag.tar.xz -C /tools verilator-$tag
 
-# zlib
-cd /data/src/zlib
+# DREAMplace
+cd /data/src/DREAMPlace
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
-if [[ "$os" == "centos" ]]
+python3 -m venv --clear --copies /tools/DREAMPlace-$tag/venv
+source /tools/DREAMPlace-$tag/venv/bin/activate
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple --upgrade pip
+pip3 install --trusted-host mirrors.tencentyun.com -i http://mirrors.tencentyun.com/pypi/simple numpy torch
+mkdir -p build && cd build
+if [[ "$os" == "openeuler" ]]
 then
-	CC="ccache gcc" CXX="ccache g++" CFLAGS=-fPIC ./configure --prefix=/tools/zlib-$tag
-	make clean && make -j2 && make install && make clean
-	tar -cJf /data/release/$os/zlib-$tag.tar.xz -C /tools zlib-$tag
+	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
+elif [[ "$os" == "centos" ]]
+then
+	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+		-DBOOST_INCLUDEDIR=/usr/include/boost169 -DBOOST_LIBRARYDIR=/usr/lib64/boost169 \
+		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi
+make -j2
+make install
+cd .. && rm -rf build
+deactivate
+tar -cJf /data/release/$os/DREAMPlace-$tag.tar.xz -C /tools DREAMPlace-$tag
 
 # cleanup
 rm -rf /tools
