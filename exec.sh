@@ -40,7 +40,8 @@ tag=5.5
 if [[ "$os" == "openeuler" ]]
 then
 	tar -xJf /data/release/$os/lpsolve-$tag.tar.xz -C /tools
-	INSTALL_LPSOLVE=/tools/lpsolve-$tag
+	mv /tools/lpsolve-$tag/include/*.h /usr/include/
+	mv /tools/lpsolve-$tag/lib/*.so /usr/lib64/
 fi
 
 # klayout
@@ -299,8 +300,6 @@ mkdir -p build && cd build
 if [[ "$os" == "openeuler" ]]
 then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
-		-DLPSOLVE_INCLUDE_DIRS=$INSTALL_LPSOLVE/include \
-		-DLPSOLVE_LIBRARIES=$INSTALL_LPSOLVE/lib \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 elif [[ "$os" == "centos" ]]
 then
