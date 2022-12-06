@@ -96,6 +96,14 @@ then
 	export PATH=/tools/bison-$tag/bin:$PATH
 fi
 
+# lpsolve
+cd /data/src/lp_solve_5.5
+tag=5.5
+if [[ "$os" == "openeuler" ]]
+then
+	cp /data/src/lpsolve-$tag.tar.xz /data/release/$os/lpsolve-$tag.tar.xz
+fi
+
 # cleanup
 rm -rf /tools
 

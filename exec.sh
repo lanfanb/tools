@@ -34,6 +34,15 @@ then
 	export PATH=/tools/bison-$tag/bin:$PATH
 fi
 
+# lpsolve
+cd /data/src/lp_solve_5.5
+tag=5.5
+if [[ "$os" == "openeuler" ]]
+then
+	tar -xJf /data/release/$os/lpsolve-$tag.tar.xz -C /tools
+	INSTALL_LPSOLVE=/tools/lpsolve-$tag
+fi
+
 # klayout
 cd /data/src/klayout
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
@@ -290,6 +299,8 @@ mkdir -p build && cd build
 if [[ "$os" == "openeuler" ]]
 then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+		-DLPSOLVE_INCLUDE_DIRS=$INSTALL_LPSOLVE/include \
+		-DLPSOLVE_LIBRARIES=$INSTALL_LPSOLVE/lib \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 elif [[ "$os" == "centos" ]]
 then
