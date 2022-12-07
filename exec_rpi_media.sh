@@ -10,7 +10,7 @@ cd /data/src/ffmpeg
 tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
 tag=${tag//n/}
 tag=${tag//^*/}
-if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$tag" == "udefied" ]]; then tag=$d; fi
 mkdir -p build && cd build
 ../configure --cc="ccache gcc" --cxx="ccache g++" --prefix=/data/tools/ffmpeg-$tag \
 	--toolchain=hardened --enable-gpl --enable-version3 --enable-nonfree --enable-gnutls \
