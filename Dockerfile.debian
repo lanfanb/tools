@@ -1,0 +1,4 @@
+FROM docker.io/lanfanb/siqbase:debian.latest 
+RUN /data/src/tools/exec_pre.sh debian ; \
+/data/src/tools/exec.sh debian
+CMD ["/usr/sbin/init"]
