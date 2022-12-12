@@ -1,0 +1,4 @@
+FROM docker.io/lanfanb/siqbase:ubuntu.latest 
+RUN /data/src/tools/exec_pre.sh ubuntu ; \
+/data/src/tools/exec.sh ubuntu
+CMD ["/usr/sbin/init"]
