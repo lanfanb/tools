@@ -94,6 +94,13 @@ then
 	make clean && make -j2 && make install && make clean
 	tar -cJf /data/release/$os/bison-$tag.tar.xz -C /tools bison-$tag
 	export PATH=/tools/bison-$tag/bin:$PATH
+elif [[ "$os" == "ubuntu" ]]
+then
+	./bootstrap
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/bison-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/bison-$tag.tar.xz -C /tools bison-$tag
+	export PATH=/tools/bison-$tag/bin:$PATH
 fi
 
 # lpsolve
@@ -102,6 +109,21 @@ tag=5.5
 if [[ "$os" == "openeuler" ]]
 then
 	cp /data/src/lpsolve-$tag.tar.xz /data/release/$os/lpsolve-$tag.tar.xz
+fi
+
+# boost
+cd /data/src/boost
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+tag=${tag//boost-/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$os" == "ubuntu" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./bootstrap.sh --prefix=/tools/boost-$tag
+	CC="ccache gcc" CXX="ccache g++" ./b2
+	CC="ccache gcc" CXX="ccache g++" ./b2 headers
+	tar -cJf /data/release/$os/boost-$tag.tar.xz -C /tools boost-$tag
 fi
 
 # cleanup

@@ -213,10 +213,12 @@ tag=${tag//\^*/}
 tag=${tag//yosys-/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 make clean
+make clean-abc
 make config-gcc
 make PREFIX=/tools/yosys-$tag -j2
 make PREFIX=/tools/yosys-$tag install
 make clean
+make clean-abc
 tar -cJf /data/release/$os/yosys-$tag.tar.xz -C /tools yosys-$tag
 INSTALL_YOSYS=/tools/yosys-$tag
 
