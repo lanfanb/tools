@@ -32,6 +32,10 @@ if [[ "$os" == "centos" ]]
 then
 	tar -xJf /data/release/$os/bison-$tag.tar.xz -C /tools
 	export PATH=/tools/bison-$tag/bin:$PATH
+elif [[ "$os" == "ubuntu" ]]
+then
+	tar -xJf /data/release/$os/bison-$tag.tar.xz -C /tools
+	export PATH=/tools/bison-$tag/bin:$PATH
 fi
 
 # lpsolve
@@ -42,6 +46,19 @@ then
 	tar -xJf /data/release/$os/lpsolve-$tag.tar.xz -C /tools
 	mv /tools/lpsolve-$tag/include/*.h /usr/include/
 	mv /tools/lpsolve-$tag/lib/*.so /usr/lib64/
+fi
+
+# boost
+cd /data/src/boost
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=${tag//v/}
+tag=${tag//\^*/}
+tag=${tag//boost-/}
+if [[ "$tag" == "undefined" ]]; then tag=$d; fi
+if [[ "$os" == "ubuntu" ]]
+then
+	tar -xJf /data/release/$os/boost-$tag.tar.xz -C /tools
+	export INSTALL_BOOST=/tools/boost-$tag
 fi
 
 # klayout
@@ -141,6 +158,7 @@ then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/OpenROAD-$tag -DCMAKE_BUILD_TYPE=RELEASE \
 		-Dspdlog_ROOT=$INSTALL_SPDLOG -DLEMON_ROOT=$INSTALL_LEMON -DEigen3_ROOT=$INSTALL_EIGEN \
 		-DCMAKE_PREFIX_PATH="$INSTALL_ORTOOLS/lib/cmake" \
+		-DBOOST_INCLUDEDIR=$INSTALL_BOOST/include -DBOOST_LIBRARYDIR=$INSTALL_BOOST/lib \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi
 make -j2 && make install
@@ -327,6 +345,7 @@ then
 elif [[ "$os" == "ubuntu" ]]
 then
 	cmake .. -DCMAKE_INSTALL_PREFIX=/tools/DREAMPlace-$tag -DCMAKE_BUILD_TYPE=RELEASE \
+		-DBOOST_INCLUDEDIR=$INSTALL_BOOST/include -DBOOST_LIBRARYDIR=$INSTALL_BOOST/lib \
 		-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache
 fi
 make -j2

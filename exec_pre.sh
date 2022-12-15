@@ -63,6 +63,12 @@ then
 	make clean && make -j2 && make install && make clean
 	tar -cJf /data/release/$os/autoconf-$tag.tar.xz -C /tools autoconf-$tag
 	export PATH=/tools/autoconf-$tag/bin:$PATH
+elif [[ "$os" == "ubuntu" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/autoconf-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/autoconf-$tag.tar.xz -C /tools autoconf-$tag
+	export PATH=/tools/autoconf-$tag/bin:$PATH
 fi
 
 # automake
@@ -74,6 +80,12 @@ if [[ "$tag" == "undefined" ]]; then tag=$d; fi
 cd /data/src/gnu/automake-1.16.5
 tag=1.16.5
 if [[ "$os" == "centos" ]]
+then
+	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/automake-$tag
+	make clean && make -j2 && make install && make clean
+	tar -cJf /data/release/$os/automake-$tag.tar.xz -C /tools automake-$tag
+	export PATH=/tools/automake-$tag/bin:$PATH
+elif [[ "$os" == "ubuntu" ]]
 then
 	CC="ccache gcc" CXX="ccache g++" ./configure --prefix=/tools/automake-$tag
 	make clean && make -j2 && make install && make clean
@@ -123,6 +135,7 @@ then
 	CC="ccache gcc" CXX="ccache g++" ./bootstrap.sh --prefix=/tools/boost-$tag
 	CC="ccache gcc" CXX="ccache g++" ./b2
 	CC="ccache gcc" CXX="ccache g++" ./b2 headers
+	CC="ccache gcc" CXX="ccache g++" ./b2 install
 	tar -cJf /data/release/$os/boost-$tag.tar.xz -C /tools boost-$tag
 fi
 
