@@ -265,7 +265,7 @@ tar -cJf /data/release/$os/qflow-$tag.tar.xz -C /tools qflow-$tag
 
 # OpenLane
 cd /data/src/OpenLane
-tag=$(git name-rev --tags --name-only $(git rev-parse HEAD))
+tag=$(git name-rev --tags --name-only $(git rev-parse HEAD^1))
 tag=${tag//v/}
 tag=${tag//\^*/}
 if [[ "$tag" == "undefined" ]]; then tag=$d; fi
